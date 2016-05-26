@@ -1,0 +1,86 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Story-telling with mosaic-js: Main Page</title>
+
+    <script src="js/jquery-2.1.4.js"></script>
+    <script src="js/gstatic-charts-loader.js"></script>
+
+    <link rel="stylesheet" href="css/mosaic_storytelling_main.css" />
+    <script src='https://www.google.com/jsapi?autoload={
+        "modules":[{
+        "name":"visualization",
+        "version":"1"
+        }]
+      }'></script>
+    <script>
+        var storiesUrl = "https://www.google.com/fusiontables/gvizdata?tq=" + encodeURIComponent("SELECT * FROM 11GIuPZEuP2ZDk0vz2czYSFCCRM_OpFA7UiPftraR WHERE Active = 'Yes' ORDER BY StoryID");
+        var mosaicUrl = "mosaic-js09_exportLayout.html?storyid=";
+        var storyDataTable;
+
+        google.setOnLoadCallback(function () {
+            var query = new google.visualization.Query(storiesUrl);
+            query.send(function (response) {
+                var dt = response.getDataTable();
+                var nRows = dt.getNumberOfRows();
+                var sectionSet = {};
+                var sectionList = [];
+                var i, j;
+                for (i = 0; i < nRows; i++) {
+                    var sectionText = dt.getValue(i, 4);
+                    var sectionStories = sectionSet[sectionText];
+                    if (!sectionStories) {
+                        sectionList.push(sectionText);
+                        sectionStories = [];
+                        sectionSet[sectionText] = sectionStories;
+                    }
+
+                    sectionStories.push(i);
+                }
+
+                var nSections = sectionList.length;
+                var mainElement = $("main");
+                mainElement.find("section").remove();
+
+                for (i = 0; i < nSections; i++) {
+                    var sectionText = sectionList[i];
+                    mainElement.append("<section><h2>" + sectionText + "</h2></section>");
+                    var lastSection = mainElement.find("section:last");
+                    var sectionStories = sectionSet[sectionText];
+                    var n = sectionStories.length;
+                    for (j = 0; j < n; j++) {
+                        var rowIndex = sectionStories[j];
+                        lastSection.append("<article><header><h3>" + dt.getValue(rowIndex, 1) + "</h3>"
+                                + "<p>(" + dt.getValue(rowIndex, 8) + ", " + dt.getFormattedValue(rowIndex, 9)
+                                + ")</p></header><p><img src='" + dt.getValue(rowIndex, 5) + "' />" + dt.getValue(rowIndex, 2)
+                                + " <a href='" + mosaicUrl + dt.getValue(rowIndex, 0) + "'"
+                                //+ "target='_blank'"
+                                + ">(read&nbsp;more...)</a></p></article>");
+                    }
+                }
+
+                storyDataTable = dt;
+            });
+
+        });
+    </script>
+
+
+</head>
+<body>
+    <header class="Banner">
+        <h1>Visualization for Agricultural Research Projects in Thailand</h1>
+        <p>สื่อนำเสนอข้อมูลโครงการวิจัยทางการเกษตรในประเทศไทย</p>
+    </header>
+    <main>
+    </main>
+    <aside>
+        <h2>aside pane</h2>
+        <p> ... </p>
+    </aside>
+    <footer>
+        <p>ผลงานนี้เป็นส่วนหนึ่งของการทดลองในงานวิจัยด้านเทคโนโลยีสารสนเทศ ด้วยเทคนิค Dynamic Tree-map Dashboard (mosaic-js) โดย น.ส.ชุติมา&nbsp;วุฒิเขตร์&nbsp;(นิสิต), รศ.ดร.พันธุ์ปิติ&nbsp;เปี่ยมสง่า&nbsp;(ที่ปรึกษา) คณะวิศวกรรมศาสตร์ มหาวิทยาลัยเกษตรศาสตร์</p>
+    </footer>
+</body>
+</html>
